@@ -14,7 +14,7 @@ namespace ApiGymphony.Repositories
             this.context = context;
         }
 
-        public async Task<ValidacionUsuario> LogInUserAsync( string email, string password )
+        public async Task<ValidacionUsuario> LogInUserAsync( string email, string password ) //
         {
             var consulta = from datos in this.context.ValidacionUsuario where datos.Email == email select datos;
             ValidacionUsuario user = await consulta.FirstOrDefaultAsync();
@@ -39,13 +39,13 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task<Usuario> FindUsuarioAsync( int idUsuario )
+        public async Task<Usuario> FindUsuarioAsync( int idUsuario ) //
         {
             var consulta = from datos in this.context.Usuarios where datos.IdUsuario == idUsuario select datos;
             return await consulta.FirstOrDefaultAsync();
         }
 
-        public async Task<Rol> FindRolPorIdRolAsync( int idRol )
+        public async Task<Rol> FindRolPorIdRolAsync( int idRol ) //
         {
             var consulta = from datos in this.context.Rol where datos.IdRol == idRol select datos;
             return await consulta.FirstOrDefaultAsync();
@@ -64,7 +64,7 @@ namespace ApiGymphony.Repositories
             return await consulta.ToListAsync();
         }
 
-        private async Task<int> GetMaxIdReservaSesionesAsync()
+        private async Task<int> GetMaxIdReservaSesionesAsync() //
         {
             if ( this.context.ReservaSesiones.Count() == 0 )
             {
@@ -76,7 +76,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task<string> ReservarPlazaAsync( int idSesion, int idCliente )
+        public async Task<string> ReservarPlazaAsync( int idSesion, int idCliente ) //
         {
             var consulta = from datos in this.context.DatosSesion where datos.IdSesion == idSesion select datos;
             DatosSesion sesion = await consulta.FirstOrDefaultAsync();
@@ -117,16 +117,7 @@ namespace ApiGymphony.Repositories
             return await consulta.FirstOrDefaultAsync();
         }
 
-        public async Task<List<int>> GetSesionesReservadasClienteAsync( int idCliente )
-        {
-            var consulta = from datos in this.context.ReservaSesiones
-                           where datos.ClienteId == idCliente
-                           select datos.SesionId;
-
-            return await consulta.ToListAsync();
-        }
-
-        public async Task<string> AnularReservaAsync( int idSesion, int idCliente )
+        public async Task<string> AnularReservaAsync( int idSesion, int idCliente ) //
         {
             ReservaSesiones reserva = await this.context.ReservaSesiones.FirstOrDefaultAsync(r => r.SesionId == idSesion && r.ClienteId == idCliente);
 
@@ -141,7 +132,16 @@ namespace ApiGymphony.Repositories
             return "OK_ANULADA";
         }
 
-        public async Task<List<DatosSesion>> GetMisSesionesCompletasAsync( int idCliente )
+        private async Task<List<int>> GetSesionesReservadasClienteAsync( int idCliente )
+        {
+            var consulta = from datos in this.context.ReservaSesiones
+                           where datos.ClienteId == idCliente
+                           select datos.SesionId;
+
+            return await consulta.ToListAsync();
+        }
+
+        public async Task<List<DatosSesion>> GetMisFuturasSesionesCompletasAsync( int idCliente )
         {
             List<int> idsReservas = await this.GetSesionesReservadasClienteAsync(idCliente);
 
@@ -219,7 +219,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task CreateSalaAsync( string nombre, int capacidadMax )
+        public async Task CreateSalaAsync( string nombre, int capacidadMax ) 
         {
             Salas sala = new Salas();
             sala.IdSalas = await GetMaxIdSalaAsync();
@@ -256,7 +256,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        private async Task<int> GetMaxIdClasesAsync()
+        private async Task<int> GetMaxIdClasesAsync() //me he quedado aqui.
         {
             if ( this.context.Clases.Count() == 0 )
             {
