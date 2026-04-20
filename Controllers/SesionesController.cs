@@ -22,14 +22,40 @@ namespace ApiGymphony.Controllers
             return await this.repo.GetTodasSesionesAsync();
         }
 
-        [HttpGet("{idSesion}")]
-        public async Task<ActionResult<DatosSesion>> FindDatosSesion( int idSesion )
+        [HttpGet("[action]/{id}")]
+        public async Task<ActionResult<Sesion>> FindSesion( int id )
         {
-            return await this.repo.FindDatosSesionAsync(idSesion);
+            return await this.repo.FindSesionAsync(id);
         }
 
-        [HttpGet]
-        [Route("[action]")]
+        [HttpPost]
+        public async Task<ActionResult> Post( Sesion sesion )
+        {
+            await this.repo.CreateSesionesAsync(sesion.ClaseId, sesion.EntrenadorId, sesion.SalaId, sesion.Fecha, sesion.HoraInicio, sesion.HoraFin);
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Put( Sesion sesion )
+        {
+            await this.repo.UpdateSesionAsync(sesion.IdSesion, sesion.ClaseId, sesion.EntrenadorId, sesion.SalaId, sesion.Fecha, sesion.HoraInicio, sesion.HoraFin);
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete( int id )
+        {
+            await this.repo.DeleteSesionAsync(id);
+            return Ok();
+        }
+
+        [HttpGet("[action]/{id}")]
+        public async Task<ActionResult<DatosSesion>> FindDatosSesion( int id )
+        {
+            return await this.repo.FindDatosSesionAsync(id);
+        }
+
+        [HttpGet("[action]")]
         public async Task<ActionResult<List<DatosSesion>>> GetSesionesNuevas()
         {
             return await this.repo.GetSesionesNuevasAsync();

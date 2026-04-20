@@ -14,7 +14,7 @@ namespace ApiGymphony.Repositories
             this.context = context;
         }
 
-        public async Task<ValidacionUsuario> LogInUserAsync( string email, string password ) //
+        public async Task<ValidacionUsuario> LogInUserAsync( string email, string password ) //falta
         {
             var consulta = from datos in this.context.ValidacionUsuario where datos.Email == email select datos;
             ValidacionUsuario user = await consulta.FirstOrDefaultAsync();
@@ -39,13 +39,13 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task<Usuario> FindUsuarioAsync( int idUsuario ) //
+        public async Task<Usuario> FindUsuarioAsync( int idUsuario )
         {
             var consulta = from datos in this.context.Usuarios where datos.IdUsuario == idUsuario select datos;
             return await consulta.FirstOrDefaultAsync();
         }
 
-        public async Task<Rol> FindRolPorIdRolAsync( int idRol ) //
+        public async Task<Rol> FindRolPorIdRolAsync( int idRol )
         {
             var consulta = from datos in this.context.Rol where datos.IdRol == idRol select datos;
             return await consulta.FirstOrDefaultAsync();
@@ -64,7 +64,7 @@ namespace ApiGymphony.Repositories
             return await consulta.ToListAsync();
         }
 
-        private async Task<int> GetMaxIdReservaSesionesAsync() //
+        private async Task<int> GetMaxIdReservaSesionesAsync()
         {
             if ( this.context.ReservaSesiones.Count() == 0 )
             {
@@ -76,7 +76,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task<string> ReservarPlazaAsync( int idSesion, int idCliente ) //
+        public async Task<string> ReservarPlazaAsync( int idSesion, int idCliente )
         {
             var consulta = from datos in this.context.DatosSesion where datos.IdSesion == idSesion select datos;
             DatosSesion sesion = await consulta.FirstOrDefaultAsync();
@@ -117,7 +117,7 @@ namespace ApiGymphony.Repositories
             return await consulta.FirstOrDefaultAsync();
         }
 
-        public async Task<string> AnularReservaAsync( int idSesion, int idCliente ) //
+        public async Task<string> AnularReservaAsync( int idSesion, int idCliente )
         {
             ReservaSesiones reserva = await this.context.ReservaSesiones.FirstOrDefaultAsync(r => r.SesionId == idSesion && r.ClienteId == idCliente);
 
@@ -256,7 +256,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        private async Task<int> GetMaxIdClasesAsync() //me he quedado aqui.
+        private async Task<int> GetMaxIdClasesAsync()
         {
             if ( this.context.Clases.Count() == 0 )
             {
@@ -305,7 +305,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task<string> ValidarSesionAsync( DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int idEntrenador, int idSala, int? idSesionActual = null )
+        public async Task<string> ValidarSesionAsync( DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int idEntrenador, int idSala, int? idSesionActual = null ) //falta
         {
             if ( fecha < DateOnly.FromDateTime(DateTime.Today) )
             {
@@ -573,7 +573,7 @@ namespace ApiGymphony.Repositories
             await this.context.SaveChangesAsync();
         }
 
-        public async Task<bool> IsSocioActivoAsync( int idUsuario )
+        public async Task<bool> IsSocioActivoAsync( int idUsuario ) //falta
         {
             var ultimaAfiliacion = await this.context.Afiliaciones.Where(a => a.ClienteId == idUsuario).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
             if ( ultimaAfiliacion == null || ultimaAfiliacion.FechaBaja != null )
@@ -583,7 +583,7 @@ namespace ApiGymphony.Repositories
             return true;
         }
 
-        private async Task<int> GetMaxIdHorarioEmpleadoAsync()
+        private async Task<int> GetMaxIdHorarioEmpleadoAsync() //aqui
         {
             if ( this.context.HorarioEmpleados.Count() == 0 )
             {

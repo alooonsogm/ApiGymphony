@@ -21,5 +21,32 @@ namespace ApiGymphony.Controllers
         {
             return await this.repo.GetTodasClasesAsync();
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Clases>> FindClase( int id )
+        {
+            return await this.repo.FindClasesAsync(id);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Post( Clases clase )
+        {
+            await this.repo.CreateClasesAsync(clase.Nombre, clase.Descripcion);
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Put( Clases clase )
+        {
+            await this.repo.UpdateClasesAsync(clase.IdClases, clase.Nombre, clase.Descripcion);
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete( int id )
+        {
+            await this.repo.DeleteClasesAsync(id);
+            return Ok();
+        }
     }
 }
