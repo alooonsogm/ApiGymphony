@@ -583,7 +583,7 @@ namespace ApiGymphony.Repositories
             return true;
         }
 
-        private async Task<int> GetMaxIdHorarioEmpleadoAsync() //aqui
+        private async Task<int> GetMaxIdHorarioEmpleadoAsync()
         {
             if ( this.context.HorarioEmpleados.Count() == 0 )
             {

@@ -17,10 +17,17 @@ namespace ApiGymphony.Controllers
         }
 
         [HttpGet]
-        [Route("[action]/{idUsuario}")]
-        public async Task<ActionResult<List<HorarioEmpleados>>> GetHorarioUsuario( int idUsuario )
+        [Route("[action]/{id}")]
+        public async Task<ActionResult<List<HorarioEmpleados>>> GetHorarioEntrenador( int id )
         {
-            return await this.repo.GetHorarioUsuarioPorIdAsync(idUsuario);
+            return await this.repo.GetHorarioUsuarioPorIdAsync(id);
+        }
+
+        [HttpGet]
+        [Route("[action]/{id}")]
+        public async Task<ActionResult<List<HorarioEmpleados>>> GetHorarioEntrenadorOrdenado( int id )
+        {
+            return await this.repo.GetHorariosEntrenadorAsync(id);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ApiGymphony.Repositories;
+﻿using ApiGymphony.Models;
+using ApiGymphony.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
@@ -17,7 +18,7 @@ namespace ApiGymphony.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<ActionResult> ReservarPlaza( ReservaSesiones reserva )
+        public async Task<ActionResult> ReservarPlaza( ReservaSesionesDTO reserva )
         {
             if ( reserva == null )
             {
@@ -37,7 +38,7 @@ namespace ApiGymphony.Controllers
         }
 
         [HttpDelete("[action]")]
-        public async Task<ActionResult> AnularReserva( ReservaSesiones reserva )
+        public async Task<ActionResult> AnularReserva( ReservaSesionesDTO reserva )
         {
             if ( reserva == null )
             {
