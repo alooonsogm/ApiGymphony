@@ -305,7 +305,7 @@ namespace ApiGymphony.Repositories
             }
         }
 
-        public async Task<string> ValidarSesionAsync( DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int idEntrenador, int idSala, int? idSesionActual = null ) //falta
+        public async Task<string> ValidarSesionAsync( DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int idEntrenador, int idSala, int? idSesionActual = null )
         {
             if ( fecha < DateOnly.FromDateTime(DateTime.Today) )
             {

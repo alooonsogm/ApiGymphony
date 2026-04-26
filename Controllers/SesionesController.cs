@@ -1,4 +1,5 @@
-﻿using ApiGymphony.Repositories;
+﻿using ApiGymphony.Models;
+using ApiGymphony.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
@@ -66,6 +67,33 @@ namespace ApiGymphony.Controllers
         public async Task<ActionResult<List<DatosSesion>>> GetMisFuturasSesiones( int idCliente )
         {
             return await this.repo.GetMisFuturasSesionesCompletasAsync(idCliente);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<ActionResult> ValidarSesion( ValidarSesionDTO model )
+        {
+            if ( model == null )
+            {
+                return BadRequest(new { status = "error", mensaje = "Faltan datos para validar." });
+            }
+
+            try
+            {
+                string resultado = await this.repo.ValidarSesionAsync(model.Fecha, model.HoraInicio, model.HoraFin, model.IdEntrenador, model.IdSala, model.IdSesionActual);
+
+                if ( resultado == "OK" )
+                {
+                    return Ok(new { esValida = true, mensaje = "La sesión se puede programar correctamente." });
+                }
+                else
+                {
+                    return Ok(new { esValida = false, mensaje = resultado });
+                }
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest(new { status = "error", mensaje = "Error interno al validar: " + ex.Message });
+            }
         }
     }
 }

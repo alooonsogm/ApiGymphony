@@ -1,9 +1,17 @@
 using ApiGymphony.Data;
+using ApiGymphony.Helpers;
 using ApiGymphony.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<HelperUsuarioToken>();
+HelperCifrado.Initialize(builder.Configuration);
+HelperActionOAuthService helper = new HelperActionOAuthService(builder.Configuration);
+builder.Services.AddSingleton<HelperActionOAuthService>(helper);
+builder.Services.AddAuthentication(helper.GetAuthenticationSchema()).AddJwtBearer(helper.GetJWtBearerOptions());
 
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("SqlAzure");
@@ -31,6 +39,7 @@ app.MapGet("/", context =>
     return Task.CompletedTask;
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
