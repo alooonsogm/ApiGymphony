@@ -1,6 +1,8 @@
 ﻿using ApiGymphony.Helpers;
 using ApiGymphony.Models;
 using ApiGymphony.Repositories;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,18 +17,45 @@ namespace ApiGymphony.Controllers
     {
         private RepositoryGymphony repo;
         private HelperUsuarioToken helper;
+        private BlobServiceClient blobServiceClient;
 
-        public UsuariosController( RepositoryGymphony repo, HelperUsuarioToken helper )
+        public UsuariosController( RepositoryGymphony repo, HelperUsuarioToken helper, BlobServiceClient blobServiceClient )
         {
             this.repo = repo;
             this.helper = helper;
+            this.blobServiceClient = blobServiceClient;
         }
 
         [HttpGet("[action]")]
         public async Task<ActionResult<Usuario>> GetMiPerfil()
         {
             UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
-            return await this.repo.FindUsuarioAsync(usuarioLogueado.IdUsuario);
+            Usuario user = await this.repo.FindUsuarioAsync(usuarioLogueado.IdUsuario);
+
+            if ( user != null && !string.IsNullOrEmpty(user.RutaFoto) )
+            {
+                string containerName = "usuariosgymphony";
+                BlobContainerClient containerClient = this.blobServiceClient.GetBlobContainerClient(containerName);
+                BlobClient blobClient = containerClient.GetBlobClient(user.RutaFoto);
+
+                if ( await blobClient.ExistsAsync() )
+                {
+                    BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                    {
+                        BlobContainerName = containerName,
+                        BlobName = user.RutaFoto,
+                        Resource = "b",
+                        ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
+                    };
+
+                    sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                    Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+                    user.RutaFoto = sasUri.ToString();
+                }
+            }
+
+            return user;
         }
 
         [HttpGet("{id}")]
@@ -64,12 +93,39 @@ namespace ApiGymphony.Controllers
 
         [Authorize(Roles = "Administrador")]
         [HttpPost("[action]")]
-        public async Task<ActionResult> RegistroSocio( SocioDTO nuevoSocio )
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> RegistroSocio( [FromForm] SocioDTO nuevoSocio )
         {
             if ( nuevoSocio == null )
             {
                 return BadRequest(new { status = "error", mensaje = "Los datos de registro son obligatorios." });
             }
+
+            string nombreBlob = "default.jpg";
+
+            if ( nuevoSocio.RutaFoto != null && nuevoSocio.RutaFoto.Length > 0 )
+            {
+                string extension = Path.GetExtension(nuevoSocio.RutaFoto.FileName);
+                nombreBlob = Guid.NewGuid().ToString() + extension;
+
+                string containerName = "usuariosgymphony";
+                BlobContainerClient containerClient = this.blobServiceClient.GetBlobContainerClient(containerName);
+                BlobClient blobClient = containerClient.GetBlobClient(nombreBlob);
+
+                using ( Stream stream = nuevoSocio.RutaFoto.OpenReadStream() )
+                {
+                    var blobOptions = new Azure.Storage.Blobs.Models.BlobUploadOptions
+                    {
+                        HttpHeaders = new Azure.Storage.Blobs.Models.BlobHttpHeaders
+                        {
+                            ContentType = nuevoSocio.RutaFoto.ContentType
+                        }
+                    };
+
+                    await blobClient.UploadAsync(stream, blobOptions);
+                }
+            }
+
             await this.repo.RegistroSocioAsync(
                 nuevoSocio.Email,
                 nuevoSocio.Password,
@@ -78,7 +134,7 @@ namespace ApiGymphony.Controllers
                 nuevoSocio.Telefono,
                 nuevoSocio.FechaNacimiento,
                 nuevoSocio.Dni,
-                nuevoSocio.RutaFoto
+                nombreBlob
             );
 
             return Ok(new { status = "success", mensaje = "Socio registrado correctamente." });
@@ -124,7 +180,8 @@ namespace ApiGymphony.Controllers
 
         [Authorize(Roles = "Administrador")]
         [HttpPost("[action]")]
-        public async Task<ActionResult> RegistroEntrenador( EntrenadorDTO model )
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> RegistroEntrenador( [FromForm] EntrenadorDTO model )
         {
             if ( model == null || model.Usuario == null )
             {
@@ -133,6 +190,31 @@ namespace ApiGymphony.Controllers
 
             try
             {
+                string nombreBlob = "default.jpg";
+
+                if ( model.Usuario.RutaFoto != null && model.Usuario.RutaFoto.Length > 0 )
+                {
+                    string extension = Path.GetExtension(model.Usuario.RutaFoto.FileName);
+                    nombreBlob = Guid.NewGuid().ToString() + extension;
+
+                    string containerName = "usuariosgymphony";
+                    BlobContainerClient containerClient = this.blobServiceClient.GetBlobContainerClient(containerName);
+                    BlobClient blobClient = containerClient.GetBlobClient(nombreBlob);
+
+                    using ( Stream stream = model.Usuario.RutaFoto.OpenReadStream() )
+                    {
+                        var blobOptions = new Azure.Storage.Blobs.Models.BlobUploadOptions
+                        {
+                            HttpHeaders = new Azure.Storage.Blobs.Models.BlobHttpHeaders
+                            {
+                                ContentType = model.Usuario.RutaFoto.ContentType
+                            }
+                        };
+
+                        await blobClient.UploadAsync(stream, blobOptions);
+                    }
+                }
+
                 await this.repo.RegistroEntrenadorAsync(
                     model.Usuario.Email,
                     model.Usuario.Password,
@@ -141,7 +223,7 @@ namespace ApiGymphony.Controllers
                     model.Usuario.Telefono,
                     model.Usuario.FechaNacimiento,
                     model.Usuario.Dni,
-                    model.Usuario.RutaFoto,
+                    nombreBlob,
                     model.DiasSemana,
                     model.HorasInicio,
                     model.HorasFin

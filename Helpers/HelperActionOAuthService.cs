@@ -11,11 +11,11 @@ namespace ApiGymphony.Helpers
         public string Audience { get; set; }
         public string SecretKey { get; set; }
 
-        public HelperActionOAuthService( IConfiguration configuration )
+        public HelperActionOAuthService( string issuer, string audience, string secretKey )
         {
-            this.Issuer = configuration.GetValue<string>("ApiOAuthToken:Issuer");
-            this.Audience = configuration.GetValue<string>("ApiOAuthToken:Audience");
-            this.SecretKey = configuration.GetValue<string>("ApiOAuthToken:SecretKey");
+            this.Issuer = issuer;
+            this.Audience = audience;
+            this.SecretKey = secretKey;
         }
 
         public SymmetricSecurityKey GetKeyToken()

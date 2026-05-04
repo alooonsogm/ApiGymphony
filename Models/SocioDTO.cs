@@ -9,6 +9,6 @@
         public string Telefono { get; set; }
         public DateOnly FechaNacimiento { get; set; }
         public string Dni { get; set; }
-        public string RutaFoto { get; set; }
+        public IFormFile RutaFoto { get; set; }
     }
 }

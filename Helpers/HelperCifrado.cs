@@ -7,9 +7,9 @@ namespace ApiGymphony.Helpers
     {
         private static string KeyCifrado;
 
-        public static void Initialize( IConfiguration configuration )
+        public static void Initialize( string llaveSecreta )
         {
-            KeyCifrado = configuration.GetValue<string>("ConfiguracionCifrado:LlaveSecreta");
+            KeyCifrado = llaveSecreta;
         }
 
         public static string CifrarString( string data )
