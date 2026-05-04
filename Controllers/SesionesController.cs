@@ -1,20 +1,25 @@
-﻿using ApiGymphony.Models;
+﻿using ApiGymphony.Helpers;
+using ApiGymphony.Models;
 using ApiGymphony.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
 
 namespace ApiGymphony.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SesionesController : ControllerBase
     {
         private RepositoryGymphony repo;
+        private HelperUsuarioToken helper;
 
-        public SesionesController(RepositoryGymphony repo )
+        public SesionesController( RepositoryGymphony repo, HelperUsuarioToken helper )
         {
             this.repo = repo;
+            this.helper = helper;
         }
 
         [HttpGet]
@@ -29,6 +34,7 @@ namespace ApiGymphony.Controllers
             return await this.repo.FindSesionAsync(id);
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         public async Task<ActionResult> Post( Sesion sesion )
         {
@@ -36,6 +42,7 @@ namespace ApiGymphony.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPut]
         public async Task<ActionResult> Put( Sesion sesion )
         {
@@ -43,6 +50,7 @@ namespace ApiGymphony.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete( int id )
         {
@@ -62,13 +70,15 @@ namespace ApiGymphony.Controllers
             return await this.repo.GetSesionesNuevasAsync();
         }
 
-        [HttpGet]
-        [Route("[action]/{idCliente}")]
-        public async Task<ActionResult<List<DatosSesion>>> GetMisFuturasSesiones( int idCliente )
+        [Authorize(Roles = "Socio")]
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<DatosSesion>>> GetMisFuturasSesiones()
         {
-            return await this.repo.GetMisFuturasSesionesCompletasAsync(idCliente);
+            UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
+            return await this.repo.GetMisFuturasSesionesCompletasAsync(usuarioLogueado.IdUsuario);
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost("[action]")]
         public async Task<ActionResult> ValidarSesion( ValidarSesionDTO model )
         {

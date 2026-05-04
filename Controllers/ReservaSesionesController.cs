@@ -1,31 +1,38 @@
-﻿using ApiGymphony.Models;
+﻿using ApiGymphony.Helpers;
+using ApiGymphony.Models;
 using ApiGymphony.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
 
 namespace ApiGymphony.Controllers
 {
+    [Authorize(Roles = "Socio")]
     [Route("api/[controller]")]
     [ApiController]
     public class ReservaSesionesController : ControllerBase
     {
         private RepositoryGymphony repo;
+        private HelperUsuarioToken helper;
 
-        public ReservaSesionesController( RepositoryGymphony repo )
+        public ReservaSesionesController( RepositoryGymphony repo, HelperUsuarioToken helper )
         {
             this.repo = repo;
+            this.helper = helper;
         }
 
-        [HttpPost("[action]")]
-        public async Task<ActionResult> ReservarPlaza( ReservaSesionesDTO reserva )
+        [HttpPost("[action]/{sesionId}")]
+        public async Task<ActionResult> ReservarPlaza( int sesionId )
         {
-            if ( reserva == null )
+            if ( sesionId <= 0 )
             {
-                return BadRequest(new { status = "error", mensaje = "Datos de la reserva incorrectos." });
+                return BadRequest(new { status = "error", mensaje = "ID de sesión no válido." });
             }
 
-            string resultado = await this.repo.ReservarPlazaAsync(reserva.SesionId, reserva.ClienteId);
+            UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
+
+            string resultado = await this.repo.ReservarPlazaAsync(sesionId, usuarioLogueado.IdUsuario);
 
             if ( resultado == "OK" )
             {
@@ -37,15 +44,17 @@ namespace ApiGymphony.Controllers
             }
         }
 
-        [HttpDelete("[action]")]
-        public async Task<ActionResult> AnularReserva( ReservaSesionesDTO reserva )
+        [HttpDelete("[action]/{sesionId}")]
+        public async Task<ActionResult> AnularReserva( int sesionId )
         {
-            if ( reserva == null )
+            if ( sesionId <= 0 )
             {
-                return BadRequest(new { status = "error", mensaje = "Datos de la reserva incorrectos." });
+                return BadRequest(new { status = "error", mensaje = "ID de sesión no válido." });
             }
 
-            string resultado = await this.repo.AnularReservaAsync(reserva.SesionId, reserva.ClienteId);
+            UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
+
+            string resultado = await this.repo.AnularReservaAsync(sesionId, usuarioLogueado.IdUsuario);
 
             if ( resultado == "OK_ANULADA" )
             {

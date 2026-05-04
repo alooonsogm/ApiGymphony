@@ -14,7 +14,7 @@ namespace ApiGymphony.Repositories
             this.context = context;
         }
 
-        public async Task<ValidacionUsuario> LogInUserAsync( string email, string password ) //falta
+        public async Task<ValidacionUsuario> LogInUserAsync( string email, string password )
         {
             var consulta = from datos in this.context.ValidacionUsuario where datos.Email == email select datos;
             ValidacionUsuario user = await consulta.FirstOrDefaultAsync();
@@ -573,7 +573,7 @@ namespace ApiGymphony.Repositories
             await this.context.SaveChangesAsync();
         }
 
-        public async Task<bool> IsSocioActivoAsync( int idUsuario ) //falta
+        public async Task<bool> IsSocioActivoAsync( int idUsuario )
         {
             var ultimaAfiliacion = await this.context.Afiliaciones.Where(a => a.ClienteId == idUsuario).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
             if ( ultimaAfiliacion == null || ultimaAfiliacion.FechaBaja != null )

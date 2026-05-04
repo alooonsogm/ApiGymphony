@@ -1,10 +1,15 @@
 using ApiGymphony.Data;
 using ApiGymphony.Helpers;
 using ApiGymphony.Repositories;
+using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+string azureKeys = builder.Configuration.GetValue<string>("AzureKeys:StoredAccount");
+BlobServiceClient blobServiceClient = new BlobServiceClient(azureKeys);
+builder.Services.AddTransient<BlobServiceClient>(x => blobServiceClient);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<HelperUsuarioToken>();

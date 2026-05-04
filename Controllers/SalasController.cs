@@ -1,10 +1,12 @@
 ﻿using ApiGymphony.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
 
 namespace ApiGymphony.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     [Route("api/[controller]")]
     [ApiController]
     public class SalasController : ControllerBase

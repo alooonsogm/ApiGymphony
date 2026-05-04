@@ -1,20 +1,32 @@
-﻿using ApiGymphony.Models;
+﻿using ApiGymphony.Helpers;
+using ApiGymphony.Models;
 using ApiGymphony.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
 
 namespace ApiGymphony.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
     {
         private RepositoryGymphony repo;
+        private HelperUsuarioToken helper;
 
-        public UsuariosController( RepositoryGymphony repo )
+        public UsuariosController( RepositoryGymphony repo, HelperUsuarioToken helper )
         {
             this.repo = repo;
+            this.helper = helper;
+        }
+
+        [HttpGet("[action]")]
+        public async Task<ActionResult<Usuario>> GetMiPerfil()
+        {
+            UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
+            return await this.repo.FindUsuarioAsync(usuarioLogueado.IdUsuario);
         }
 
         [HttpGet("{id}")]
@@ -23,6 +35,7 @@ namespace ApiGymphony.Controllers
             return await this.repo.FindUsuarioAsync(id);
         }
 
+        [Authorize(Roles = "Administrador, Entrenador")]
         [HttpGet("[action]/{idSesion}")]
         public async Task<ActionResult<List<Usuario>>> GetUsuariosPorSesion( int idSesion )
         {
@@ -35,18 +48,21 @@ namespace ApiGymphony.Controllers
             return await this.repo.GetUsuariosPorRolAsync(rol);
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpGet("[action]")]
         public async Task<ActionResult<List<VistaSocio>>> GetSociosConEstado()
         {
             return await this.repo.GetSociosConEstadoAsync();
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpGet("[action]")]
         public async Task<ActionResult<List<Usuario>>> GetEntrenadores()
         {
             return await this.repo.GetTodosEntrenadoresAsync();
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost("[action]")]
         public async Task<ActionResult> RegistroSocio( SocioDTO nuevoSocio )
         {
@@ -68,6 +84,7 @@ namespace ApiGymphony.Controllers
             return Ok(new { status = "success", mensaje = "Socio registrado correctamente." });
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpDelete("[action]/{id}")]
         public async Task<ActionResult> DeleteSocio( int id )
         {
@@ -75,6 +92,7 @@ namespace ApiGymphony.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPut("[action]/{idSocio}")]
         public async Task<ActionResult> DarDeBajaSocio( int idSocio )
         {
@@ -89,6 +107,7 @@ namespace ApiGymphony.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost("[action]/{idSocio}")]
         public async Task<ActionResult> DarDeAltaSocio( int idSocio )
         {
@@ -103,6 +122,7 @@ namespace ApiGymphony.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost("[action]")]
         public async Task<ActionResult> RegistroEntrenador( EntrenadorDTO model )
         {
@@ -135,6 +155,7 @@ namespace ApiGymphony.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpGet("[action]/{idEntrenador}")]
         public async Task<ActionResult> ValidarBorradoEntrenador( int idEntrenador )
         {
@@ -161,6 +182,7 @@ namespace ApiGymphony.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpDelete("[action]/{idEntrenadorABorrar}")]
         public async Task<ActionResult> DeleteEntrenadorSustituyendo( int idEntrenadorABorrar, [FromQuery] int? idEntrenadorSustituto )
         {
@@ -187,6 +209,7 @@ namespace ApiGymphony.Controllers
             return await this.repo.FindVistaUsuarioAsync(idUsuario);
         }
 
+        [Authorize(Roles = "Administrador, Entrenador")]
         [HttpGet("[action]")]
         public async Task<ActionResult<List<DatosEvolucion>>> GetEvolucionSocios()
         {
@@ -205,21 +228,19 @@ namespace ApiGymphony.Controllers
             }
         }
 
-        [HttpGet("[action]/{idSocio}")]
-        public async Task<ActionResult<List<string>>> GetDiasAsistenciaSocio( int idSocio )
+        [Authorize(Roles = "Socio")]
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<string>>> GetMisDiasAsistencia()
         {
             try
             {
-                List<string> diasAsistidos = await this.repo.GetDiasAsistenciaSocioAsync(idSocio);
+                UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
+                List<string> diasAsistidos = await this.repo.GetDiasAsistenciaSocioAsync(usuarioLogueado.IdUsuario);
                 return Ok(diasAsistidos);
             }
             catch ( Exception ex )
             {
-                return BadRequest(new
-                {
-                    status = "error",
-                    mensaje = "Error al obtener el historial de asistencia: " + ex.Message
-                });
+                return BadRequest(new { status = "error", mensaje = "Error al obtener el historial de asistencia: " + ex.Message });
             }
         }
     }

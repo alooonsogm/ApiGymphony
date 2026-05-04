@@ -1,10 +1,12 @@
 ﻿using ApiGymphony.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NugetGymphonyAGM.Models;
 
 namespace ApiGymphony.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RegistroAforoController : ControllerBase
@@ -30,6 +32,7 @@ namespace ApiGymphony.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost("[action]/{idSocio}")]
         public async Task<ActionResult> RegistrarAcceso( int idSocio )
         {
@@ -66,6 +69,7 @@ namespace ApiGymphony.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador, Entrenador")]
         [HttpGet("[action]")]
         public async Task<ActionResult<List<DatosHoraPico>>> GetHorasPico()
         {

@@ -30,12 +30,24 @@ namespace ApiGymphony.Controllers
             ValidacionUsuario user = await this.repo.LogInUserAsync(model.Email, model.Password);
             if ( user == null )
             {
-                return Unauthorized();
+                // Devolvemos 401 con un mensaje JSON para que el Front-end sepa qué decir
+                return Unauthorized(new { mensaje = "Credenciales incorrectas" });
             }
             else
             {
-                SigningCredentials credentials = new SigningCredentials(this.helper.GetKeyToken(), SecurityAlgorithms.HmacSha256);
                 VistaUsuario usuario = await this.repo.FindVistaUsuarioAsync(user.Id);
+
+                if ( usuario.NombreRol == "Socio" )
+                {
+                    bool isActive = await this.repo.IsSocioActivoAsync(usuario.IdUsuario);
+                    if ( isActive == false )
+                    {
+                        // Devolvemos 403 Forbidden (Prohibido) porque sus credenciales son válidas, pero su cuenta está desactivada.
+                        return StatusCode(403, new { mensaje = "Tu membresía está dada de baja. Por favor, contacta con administración." });
+                    }
+                }
+
+                SigningCredentials credentials = new SigningCredentials(this.helper.GetKeyToken(), SecurityAlgorithms.HmacSha256);
 
                 UsuarioTokenDTO usermodel = new UsuarioTokenDTO
                 {
@@ -57,6 +69,7 @@ namespace ApiGymphony.Controllers
                 {
                     new Claim("UserData", jsonCifrado),
                     new Claim(ClaimTypes.Role, usuario.NombreRol)
+                    //Poner mas info aqui para el fronted
                 };
 
                 JwtSecurityToken token = new JwtSecurityToken(
