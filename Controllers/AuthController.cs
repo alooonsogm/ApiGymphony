@@ -68,8 +68,9 @@ namespace ApiGymphony.Controllers
                 Claim[] informacion = new[]
                 {
                     new Claim("UserData", jsonCifrado),
-                    new Claim(ClaimTypes.Role, usuario.NombreRol)
-                    //Poner mas info aqui para el fronted
+                    new Claim(ClaimTypes.Role, usuario.NombreRol),
+                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString())
                 };
 
                 JwtSecurityToken token = new JwtSecurityToken(
