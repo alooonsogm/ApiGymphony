@@ -132,7 +132,7 @@ namespace ApiGymphony.Repositories
             return "OK_ANULADA";
         }
 
-        private async Task<List<int>> GetSesionesReservadasClienteAsync( int idCliente )
+        public async Task<List<int>> GetSesionesReservadasClienteAsync( int idCliente )
         {
             var consulta = from datos in this.context.ReservaSesiones
                            where datos.ClienteId == idCliente

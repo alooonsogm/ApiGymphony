@@ -28,6 +28,14 @@ namespace ApiGymphony.Controllers
             return await this.repo.GetTodasSesionesAsync();
         }
 
+        [Authorize(Roles = "Socio")]
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<int>>> GetSesionesReservadasSocioNumeroAsync()
+        {
+            UsuarioTokenDTO usuarioLogueado = this.helper.GetUsuario();
+            return await this.repo.GetSesionesReservadasClienteAsync(usuarioLogueado.IdUsuario);
+        }
+
         [HttpGet("[action]/{id}")]
         public async Task<ActionResult<Sesion>> FindSesion( int id )
         {
