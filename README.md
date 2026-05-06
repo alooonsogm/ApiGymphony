@@ -2,7 +2,7 @@
 
 Backend principal de **Gymphony**, una plataforma de gestión integral para gimnasios. Esta API centraliza toda la lógica de negocio, acceso a datos y seguridad, diseñada para ser consumida de forma eficiente por cualquier aplicación cliente.
 
-🌍 **[Explorar la API en Azure (Swagger)] (AQUÍ_TU_URL_DE_LA_API_EN_AZURE/swagger)**
+🌍 **[Explorar la API en Azure (Scalar)] https://apigymphony.azurewebsites.net/**
 
 ## 🚀 El Reto: Migración a la Nube
 Este proyecto nació originalmente como una aplicación monolítica tradicional. Sin embargo, para mejorar su escalabilidad y seguridad, decidí refactorizarlo por completo y migrarlo a una arquitectura orientada a servicios 100% en la nube de Azure.
@@ -22,11 +22,11 @@ Este proyecto nació originalmente como una aplicación monolítica tradicional.
 * Entity Framework Core & LINQ
 * Azure App Service, Azure SQL, Azure Blob Storage, Azure Key Vault
 * Autenticación JWT Bearer
-* Swagger / OpenAPI
+* Scalar / OpenAPI
 
 ## 💻 Instalación Local
 Si deseas levantar la API en tu entorno local:
 1. Clona este repositorio.
 2. Necesitarás configurar tus propias credenciales en un `appsettings.json` local (o conectar tu entorno a tu Key Vault de Azure).
 3. Asegúrate de descargar el paquete NuGet de modelos.
-4. Compila y ejecuta el proyecto. Se abrirá la interfaz de Swagger para probar los endpoints.
+4. Compila y ejecuta el proyecto. Se abrirá la interfaz de Scalar para probar los endpoints.
