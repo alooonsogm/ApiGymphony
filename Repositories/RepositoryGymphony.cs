@@ -78,21 +78,39 @@ namespace ApiGymphony.Repositories
 
         public async Task<string> ReservarPlazaAsync( int idSesion, int idCliente )
         {
+            DateTime horaUtc = DateTime.UtcNow;
+            TimeZoneInfo zonaHorariaEspana;
+            try
+            { zonaHorariaEspana = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time"); }
+            catch ( TimeZoneNotFoundException ) { zonaHorariaEspana = TimeZoneInfo.FindSystemTimeZoneById("Europe/Madrid"); }
+
+            DateTime horaActualEspana = TimeZoneInfo.ConvertTimeFromUtc(horaUtc, zonaHorariaEspana);
+
             var consulta = from datos in this.context.DatosSesion where datos.IdSesion == idSesion select datos;
             DatosSesion sesion = await consulta.FirstOrDefaultAsync();
+
             if ( sesion == null )
             {
                 return "Error: La sesión no existe.";
             }
 
-            DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
-            TimeOnly ahora = TimeOnly.FromDateTime(DateTime.Now);
+            bool yaReservada = await this.context.ReservaSesiones.AnyAsync(r => r.SesionId == idSesion && r.ClienteId == idCliente);
+
+            if ( yaReservada )
+            {
+                return "Ya tienes una plaza reservada para esta sesión.";
+            }
+
+            DateOnly hoy = DateOnly.FromDateTime(horaActualEspana);
+            TimeOnly ahora = TimeOnly.FromDateTime(horaActualEspana);
+
             if ( sesion.Fecha < hoy || (sesion.Fecha == hoy && sesion.HoraInicio <= ahora) )
             {
                 return "No puedes reservar una sesión que ya ha comenzado o ha finalizado.";
             }
 
             int reservasActuales = await this.context.ReservaSesiones.CountAsync(r => r.SesionId == idSesion);
+
             if ( reservasActuales >= sesion.CapacidadMaxima )
             {
                 return "Lo sentimos, la sesión está completa y no quedan plazas.";
@@ -104,8 +122,9 @@ namespace ApiGymphony.Repositories
                 IdReservaSesion = idReservaSesiones,
                 SesionId = idSesion,
                 ClienteId = idCliente,
-                FechaHoraReserva = DateTime.Now
+                FechaHoraReserva = horaActualEspana
             };
+
             await this.context.ReservaSesiones.AddAsync(nuevaReserva);
             await this.context.SaveChangesAsync();
             return "OK";
