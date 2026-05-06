@@ -698,11 +698,23 @@ namespace ApiGymphony.Repositories
 
         public async Task<string> RegistrarAccesoAsync( int idSocio )
         {
+            DateTime horaUtc = DateTime.UtcNow;
+            TimeZoneInfo zonaHorariaEspana;
+            try
+            {
+                zonaHorariaEspana = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
+            }
+            catch ( TimeZoneNotFoundException )
+            {
+                zonaHorariaEspana = TimeZoneInfo.FindSystemTimeZoneById("Europe/Madrid");
+            }
+
+            DateTime horaActualEspana = TimeZoneInfo.ConvertTimeFromUtc(horaUtc, zonaHorariaEspana);
             var registroAbierto = await this.context.RegistroAforo.Where(r => r.ClienteId == idSocio && r.HoraSalida == null).FirstOrDefaultAsync();
 
             if ( registroAbierto != null )
             {
-                registroAbierto.HoraSalida = DateTime.Now;
+                registroAbierto.HoraSalida = horaActualEspana;
                 await this.context.SaveChangesAsync();
                 return "SALIDA";
             }
@@ -711,7 +723,7 @@ namespace ApiGymphony.Repositories
                 RegistroAforo nuevaEntrada = new RegistroAforo();
                 nuevaEntrada.IdRegistroAforo = await this.GetMaxIdRegistroAforoAsync();
                 nuevaEntrada.ClienteId = idSocio;
-                nuevaEntrada.HoraEntrada = DateTime.Now;
+                nuevaEntrada.HoraEntrada = horaActualEspana;
                 nuevaEntrada.HoraSalida = null;
 
                 await this.context.RegistroAforo.AddAsync(nuevaEntrada);
